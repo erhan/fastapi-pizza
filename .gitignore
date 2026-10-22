@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+*.db
+.ruff_cache/
+.pytest_cache/
+.DS_Store
+
+# keep the lockfile even if a global gitignore hides it
+!uv.lock
