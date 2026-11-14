@@ -3,7 +3,8 @@
 > 🇹🇷 Türkçe · [🇬🇧 English below](#-english)
 
 **Bir Dilim FastAPI** (*A Slice of FastAPI*) konuşmasının örnek reposu:
-[Python Pizza İstanbul](https://istanbul.python.pizza/), 14 Kasım 2026, StartGate Maslak.
+[Python Pizza İstanbul](https://istanbul.python.pizza/), 14 Kasım 2026, StartGate Maslak
+(programdaki adıyla *From Zero to Production with FastAPI*).
 Slaytlar: <https://python-pizza.erhan.dev>
 
 Pizza sipariş alan küçük bir API. FastAPI'nin temellerini tek bir projede gösterir: path / query /
@@ -82,7 +83,7 @@ Tümü `/api/v1` altında. 🔑 = `X-API-Key` gerekir.
 
 ## Örnekler
 
-Konuşmadaki her adım için tek dosyalık, çalıştırılabilir bir uygulama:
+Konuşmadaki her adım için tek dosyalık, çalıştırılabilir bir uygulama (`05_async.py` bonus: slaytlarda yok):
 
 | Dosya | Konu | Çalıştır |
 | --- | --- | --- |
@@ -121,7 +122,8 @@ Lisans: MIT.
 # 🇬🇧 English
 
 **A Slice of FastAPI** companion repo: [Python Pizza Istanbul](https://istanbul.python.pizza/),
-14 November 2026, StartGate Maslak. Slides: <https://python-pizza.erhan.dev>
+14 November 2026, StartGate Maslak (on the programme as *From Zero to Production with FastAPI*).
+Slides: <https://python-pizza.erhan.dev>
 
 A small pizza-ordering API that shows the FastAPI basics in one project: path / query / header /
 body parameters, validation with Pydantic, `Depends`, `async def` vs `def`, `BackgroundTasks` and
@@ -199,7 +201,7 @@ All under `/api/v1`. 🔑 = needs `X-API-Key`.
 
 ## Examples
 
-One runnable single-file app for every step of the talk:
+One runnable single-file app for every step of the talk (`05_async.py` is a bonus: it is not on the slides):
 
 | File | Topic | Run |
 | --- | --- | --- |
