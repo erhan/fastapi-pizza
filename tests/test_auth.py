@@ -1,3 +1,6 @@
+import asyncio
+import threading
+import time
 from collections.abc import Callable
 from typing import Any
 
@@ -105,6 +108,28 @@ def test_the_database_never_waits_for_the_hashing(
     assert client.post(f"{AUTH}/register", json=AYSE).status_code == 201
     assert log_in(client).status_code == 200
     assert seen == [0, 0]  # no connection was held while hashing, nor while verifying
+
+
+def test_at_most_two_passwords_are_hashed_at_a_time() -> None:
+    """A rush of sign-ups must not take all the CPU: the hashing queues up, two at a time."""
+    lock = threading.Lock()
+    hashing_now = 0
+    peak = 0
+
+    def slow_hash(_: int) -> None:
+        nonlocal hashing_now, peak
+        with lock:
+            hashing_now += 1
+            peak = max(peak, hashing_now)
+        time.sleep(0.02)
+        with lock:
+            hashing_now -= 1
+
+    async def rush() -> None:
+        await asyncio.gather(*(security.run_in_hasher(slow_hash, n) for n in range(8)))
+
+    asyncio.run(rush())
+    assert peak == 2
 
 
 def test_log_in_gives_a_bearer_token(client: TestClient) -> None:

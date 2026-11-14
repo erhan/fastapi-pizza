@@ -1,4 +1,3 @@
-from fastapi.concurrency import run_in_threadpool
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,7 +12,7 @@ async def register(db: AsyncSession, payload: UserCreate) -> UserRead:
     # Hashing takes a while on purpose. In a thread, the waiter keeps serving the other tables.
     # And it comes first: once a session has run a query it holds on to its database connection,
     # and nobody should have to wait for a connection while we are busy hashing.
-    hashed_password = await run_in_threadpool(security.hash_password, payload.password)
+    hashed_password = await security.run_in_hasher(security.hash_password, payload.password)
     if await user_crud.get_user_by_email(db, payload.email) is not None:
         raise EmailTakenError()
     try:
@@ -36,7 +35,7 @@ async def login(db: AsyncSession, *, email: str, password: str) -> Token:
     await db.close()  # hand the connection back before the slow part: checking the password
     if user is None or not user.is_active:
         raise InvalidCredentialsError()
-    if not await run_in_threadpool(security.verify_password, password, user.hashed_password):
+    if not await security.run_in_hasher(security.verify_password, password, user.hashed_password):
         raise InvalidCredentialsError()
     return Token(access_token=security.create_access_token(user.id))
 

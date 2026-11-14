@@ -1,10 +1,14 @@
 """Passwords and login tokens. Standard library + PyJWT: nothing here knows about FastAPI."""
 
+import asyncio
 import base64
 import hashlib
 import hmac
 import secrets
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import jwt
 
@@ -12,6 +16,15 @@ from app.core.config import settings
 
 ALGORITHM = "pbkdf2_sha256"
 ITERATIONS = 600_000  # slow on purpose: a stolen database should be expensive to crack
+
+# Hashing is pure CPU work, so it gets two threads of its own. A rush of sign-ups queues up
+# here instead of taking the CPU away from everybody who only wants to read the menu.
+_hashers = ThreadPoolExecutor(max_workers=2, thread_name_prefix="hasher")
+
+
+async def run_in_hasher[T](func: Callable[..., T], *args: Any) -> T:
+    """Run `hash_password` / `verify_password` off the event loop, at most two at a time."""
+    return await asyncio.get_running_loop().run_in_executor(_hashers, func, *args)
 
 
 def hash_password(password: str) -> str:
