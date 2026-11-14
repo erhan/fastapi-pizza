@@ -5,7 +5,8 @@
 **Bir Dilim FastAPI** (*A Slice of FastAPI*) konuşmasının örnek reposu:
 [Python Pizza İstanbul](https://istanbul.python.pizza/), 14 Kasım 2026, StartGate Maslak
 (programdaki adıyla *From Zero to Production with FastAPI*).
-Slaytlar: <https://python-pizza.erhan.dev>
+Slaytlar: <https://python-pizza.erhan.dev> ·
+Canlı API: <https://fastapi-pizza.fastapicloud.dev/docs>
 
 Pizza sipariş alan küçük bir API. FastAPI'nin temellerini tek bir projede gösterir: path / query /
 header / body parametreleri, Pydantic ile doğrulama, `Depends`, `async def` ile `def` farkı,
@@ -157,6 +158,19 @@ Yayına alırken `API_KEY` (şefin anahtarı) ve `SECRET_KEY` (JWT imzası) değ
 olarak ver. Verilmezse her süreç kendine rastgele bir anahtar üretir: uygulama hiçbir zaman bu
 README'deki demo anahtarıyla yayına çıkmaz.
 
+```bash
+# değer komut geçmişine düşmesin diye stdin'den okunur
+openssl rand -base64 48 | uv run fastapi cloud env set SECRET_KEY --secret --value-stdin
+openssl rand -base64 24 | uv run fastapi cloud env set API_KEY --secret --value-stdin
+```
+
+Bu repo tam olarak böyle yayında: <https://fastapi-pizza.fastapicloud.dev/docs>. Canlı demo
+SQLite ile çalışır (`DATABASE_URL=sqlite+aiosqlite:////tmp/pizza.db`). FastAPI Cloud boşta kalan
+uygulamayı sıfıra ölçekler ve dosya sistemi kalıcı değildir; yeni açılan her kopya menüyü baştan
+kurar, hesaplar ve siparişler ise gider. Demo için yeterli. Kalıcı veri için `DATABASE_URL`
+olarak bir PostgreSQL adresi ver (FastAPI Cloud'un Neon entegrasyonu bu değişkeni kendisi ekler)
+ve tabloları Alembic ile kur.
+
 Lisans: MIT.
 
 ---
@@ -165,7 +179,8 @@ Lisans: MIT.
 
 **A Slice of FastAPI** companion repo: [Python Pizza Istanbul](https://istanbul.python.pizza/),
 14 November 2026, StartGate Maslak (on the programme as *From Zero to Production with FastAPI*).
-Slides: <https://python-pizza.erhan.dev>
+Slides: <https://python-pizza.erhan.dev> ·
+Live API: <https://fastapi-pizza.fastapicloud.dev/docs>
 
 A small pizza-ordering API that shows the FastAPI basics in one project: path / query / header /
 body parameters, validation with Pydantic, `Depends`, `async def` vs `def`, `BackgroundTasks` and
@@ -316,5 +331,18 @@ uv run fastapi deploy
 When you deploy, pass `API_KEY` (the chef's key) and `SECRET_KEY` (signs the JWTs) as environment
 variables. Without them every process makes up a random key of its own: the app never goes live on
 the demo key printed in this README.
+
+```bash
+# read from stdin, so the value stays out of your shell history
+openssl rand -base64 48 | uv run fastapi cloud env set SECRET_KEY --secret --value-stdin
+openssl rand -base64 24 | uv run fastapi cloud env set API_KEY --secret --value-stdin
+```
+
+This repo is live exactly like that: <https://fastapi-pizza.fastapicloud.dev/docs>. The live demo
+runs on SQLite (`DATABASE_URL=sqlite+aiosqlite:////tmp/pizza.db`). FastAPI Cloud scales an idle app
+to zero and its file system is not persistent, so every new replica seeds the menu again while
+accounts and orders are gone. Fine for a demo. For data that stays, point `DATABASE_URL` at
+PostgreSQL (FastAPI Cloud's Neon integration adds that variable for you) and create the tables with
+Alembic.
 
 License: MIT.
