@@ -8,6 +8,7 @@ class Order(BaseTable):
     __tablename__ = "orders"
 
     pizza_id: Mapped[int] = mapped_column(ForeignKey("pizzas.id"), index=True)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), index=True)  # None: guest
     pizza_name: Mapped[str] = mapped_column(String(40))  # snapshot: the menu may change later
     customer_name: Mapped[str] = mapped_column(String(60))
     quantity: Mapped[int]

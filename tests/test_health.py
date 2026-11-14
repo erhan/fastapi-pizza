@@ -19,3 +19,4 @@ def test_docs_and_openapi_are_served(client: TestClient) -> None:
     schema = client.get("/openapi.json").json()
     assert "/api/v1/pizzas/{pizza_id}" in schema["paths"]
     assert "APIKeyHeader" in schema["components"]["securitySchemes"]
+    assert "OAuth2PasswordBearer" in schema["components"]["securitySchemes"]

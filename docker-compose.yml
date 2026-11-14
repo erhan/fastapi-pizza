@@ -1,0 +1,22 @@
+# A local PostgreSQL for development:
+#   docker compose up -d
+#   DATABASE_URL=postgresql://pizza:pizza@localhost:5432/pizza  (in .env)
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: pizza
+      POSTGRES_PASSWORD: pizza
+      POSTGRES_DB: pizza
+    ports:
+      - "5432:5432"
+    volumes:
+      - pizza-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pizza -d pizza"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pizza-data:

@@ -10,8 +10,12 @@ async def get_order(db: AsyncSession, order_id: int) -> Order | None:
     return await db.get(Order, order_id)
 
 
-async def list_orders(db: AsyncSession, *, limit: int, offset: int) -> list[Order]:
+async def list_orders(
+    db: AsyncSession, *, limit: int, offset: int, user_id: int | None = None
+) -> list[Order]:
     statement = select(Order).order_by(Order.id).limit(limit).offset(offset)
+    if user_id is not None:
+        statement = statement.where(Order.user_id == user_id)
     return list(await db.scalars(statement))
 
 

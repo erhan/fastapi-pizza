@@ -1,6 +1,6 @@
 from fastapi import APIRouter, BackgroundTasks, Depends
 
-from app.api.deps import DbSession, PageParams, require_api_key
+from app.api.deps import DbSession, OptionalUser, PageParams, require_api_key
 from app.schemas.common import NOT_FOUND, UNAUTHORIZED
 from app.schemas.order import OrderCreate, OrderRead, OrderUpdate
 from app.services import order as order_service
@@ -10,9 +10,10 @@ router = APIRouter()
 
 @router.post("", status_code=201, summary="Order a pizza", responses=NOT_FOUND)
 async def create_order(
-    payload: OrderCreate, db: DbSession, background_tasks: BackgroundTasks
+    payload: OrderCreate, db: DbSession, background_tasks: BackgroundTasks, user: OptionalUser
 ) -> OrderRead:
-    order = await order_service.create_order(db, payload)
+    """Guests can order too. With an access token the order is kept under `/users/me/orders`."""
+    order = await order_service.create_order(db, payload, user_id=user.id if user else None)
     background_tasks.add_task(order_service.notify_kitchen, order.id)
     return order
 

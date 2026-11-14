@@ -19,7 +19,9 @@ async def _get_or_404(db: AsyncSession, order_id: int) -> Order:
     return order
 
 
-async def create_order(db: AsyncSession, payload: OrderCreate) -> OrderRead:
+async def create_order(
+    db: AsyncSession, payload: OrderCreate, *, user_id: int | None = None
+) -> OrderRead:
     pizza = await pizza_crud.get_pizza(db, payload.pizza_id)
     if pizza is None:
         raise PizzaNotFoundError()
@@ -27,6 +29,7 @@ async def create_order(db: AsyncSession, payload: OrderCreate) -> OrderRead:
         db,
         {
             **payload.model_dump(),
+            "user_id": user_id,
             "pizza_name": pizza.name,
             "status": OrderStatus.preparing.value,
             "total_price": pizza.price * payload.quantity,
@@ -39,8 +42,10 @@ async def get_order(db: AsyncSession, order_id: int) -> OrderRead:
     return OrderRead.model_validate(await _get_or_404(db, order_id))
 
 
-async def list_orders(db: AsyncSession, *, limit: int, offset: int) -> list[OrderRead]:
-    orders = await order_crud.list_orders(db, limit=limit, offset=offset)
+async def list_orders(
+    db: AsyncSession, *, limit: int, offset: int, user_id: int | None = None
+) -> list[OrderRead]:
+    orders = await order_crud.list_orders(db, limit=limit, offset=offset, user_id=user_id)
     return [OrderRead.model_validate(order) for order in orders]
 
 

@@ -15,6 +15,8 @@ Order a pizza over HTTP 🍕 The companion API of the talk **A Slice of FastAPI*
 (Python Pizza Istanbul 2026).
 
 * **Browse the menu** and **order a pizza**: no key needed.
+* **Customers** can create an account and log in (JWT): press **Authorize**, use your e-mail as
+  the username, and your orders are kept under `/users/me/orders`.
 * **Changing the menu** (or moving an order along) is chef-only: press **Authorize** and
   send the chef's key in the `X-API-Key` header.
 * Pineapple is not a topping here. Try it. 🍍
@@ -23,6 +25,8 @@ Order a pizza over HTTP 🍕 The companion API of the talk **A Slice of FastAPI*
 TAGS_METADATA = [
     {"name": "Pizzas", "description": "The menu. Reading is free, changing it is chef-only."},
     {"name": "Orders", "description": "Order a pizza and follow it to your door."},
+    {"name": "Auth", "description": "Create an account and log in."},
+    {"name": "Users", "description": "The logged-in customer and their orders."},
     {"name": "Health", "description": "Is the oven hot?"},
 ]
 

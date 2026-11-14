@@ -32,6 +32,7 @@ class OrderRead(BaseModel):
                     "id": 1,
                     "pizza_id": 1,
                     "pizza_name": "Margherita",
+                    "user_id": None,
                     "customer_name": "Ayşe",
                     "quantity": 2,
                     "note": "Extra basil, please",
@@ -47,6 +48,7 @@ class OrderRead(BaseModel):
     id: int
     pizza_id: int
     pizza_name: str
+    user_id: int | None = Field(description="The customer's account; null for a guest order")
     customer_name: str
     quantity: int
     note: str | None
