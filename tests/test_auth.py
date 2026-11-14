@@ -4,6 +4,8 @@ from typing import Any
 import jwt
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import event
+from sqlalchemy.ext.asyncio import AsyncEngine
 
 from app.core import security
 from app.core.config import settings
@@ -67,6 +69,42 @@ def test_passwords_are_stored_hashed() -> None:
     assert security.verify_password("margherita-4ever", hashed)
     assert not security.verify_password("hawaii-4ever", hashed)
     assert not security.verify_password("margherita-4ever", "not-a-hash")
+
+
+def test_the_database_never_waits_for_the_hashing(
+    client: TestClient, engine: AsyncEngine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Hashing is slow on purpose. A request that kept its database connection meanwhile would,
+    with enough sign-ups at once, leave none for the people who only want to see the menu."""
+    connections_in_use = 0
+    seen: list[int] = []
+
+    def taken(*_: object) -> None:
+        nonlocal connections_in_use
+        connections_in_use += 1
+
+    def given_back(*_: object) -> None:
+        nonlocal connections_in_use
+        connections_in_use -= 1
+
+    event.listen(engine.sync_engine, "checkout", taken)
+    event.listen(engine.sync_engine, "checkin", given_back)
+    hash_password, verify_password = security.hash_password, security.verify_password
+
+    def watched_hash(password: str) -> str:
+        seen.append(connections_in_use)
+        return hash_password(password)
+
+    def watched_verify(password: str, hashed: str) -> bool:
+        seen.append(connections_in_use)
+        return verify_password(password, hashed)
+
+    monkeypatch.setattr(security, "hash_password", watched_hash)
+    monkeypatch.setattr(security, "verify_password", watched_verify)
+
+    assert client.post(f"{AUTH}/register", json=AYSE).status_code == 201
+    assert log_in(client).status_code == 200
+    assert seen == [0, 0]  # no connection was held while hashing, nor while verifying
 
 
 def test_log_in_gives_a_bearer_token(client: TestClient) -> None:

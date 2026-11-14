@@ -10,10 +10,12 @@ from app.schemas.auth import Token, UserCreate, UserRead
 
 
 async def register(db: AsyncSession, payload: UserCreate) -> UserRead:
+    # Hashing takes a while on purpose. In a thread, the waiter keeps serving the other tables.
+    # And it comes first: once a session has run a query it holds on to its database connection,
+    # and nobody should have to wait for a connection while we are busy hashing.
+    hashed_password = await run_in_threadpool(security.hash_password, payload.password)
     if await user_crud.get_user_by_email(db, payload.email) is not None:
         raise EmailTakenError()
-    # Hashing takes a while on purpose. In a thread, the waiter keeps serving the other tables.
-    hashed_password = await run_in_threadpool(security.hash_password, payload.password)
     try:
         user = await user_crud.create_user(
             db,
@@ -31,6 +33,7 @@ async def register(db: AsyncSession, payload: UserCreate) -> UserRead:
 
 async def login(db: AsyncSession, *, email: str, password: str) -> Token:
     user = await user_crud.get_user_by_email(db, email.lower())
+    await db.close()  # hand the connection back before the slow part: checking the password
     if user is None or not user.is_active:
         raise InvalidCredentialsError()
     if not await run_in_threadpool(security.verify_password, password, user.hashed_password):
